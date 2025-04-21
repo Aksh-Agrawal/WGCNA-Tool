@@ -1,0 +1,12 @@
+name: WGCNA-Tool
+title: WGCNA-Tool
+username: maxprogrammer007
+account: maxprogrammer007
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 14573683
+bundleId: 10153258
+url: https://maxprogrammer007.shinyapps.io/WGCNA-Tool/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
