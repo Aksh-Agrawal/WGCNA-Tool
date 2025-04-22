@@ -1,7 +1,7 @@
-### app.R
 library(shiny)
 library(shinydashboard)
 
+# Source UI modules only
 source("modules/data_upload.R")
 source("modules/wgcna_analysis.R")
 source("modules/enrichment_analysis.R")
@@ -27,11 +27,7 @@ ui <- dashboardPage(
   )
 )
 
-server <- function(input, output, session) {
-  data <- callModule(dataUploadServer, "data_upload")
-  wgcna_results <- callModule(wgcnaAnalysisServer, "wgcna_analysis", data)
-  callModule(enrichmentAnalysisServer, "enrich_analysis", wgcna_results)
-  callModule(visualizationServer, "visualization", wgcna_results)
-}
+# Source the new modular server
+source("server.R")
 
-shinyApp(ui, server)
+shinyApp(ui = ui, server = server)
