@@ -340,6 +340,7 @@ enhancedWGCNAAnalysisServer <- function(id, data) {
           traits = datTraits,
           MEs = MEs,
           power_used = input$power,
+          power_analysis = power_analysis(),  # Include power analysis results
           parameters = list(
             power = input$power,
             minModuleSize = input$min_module_size,

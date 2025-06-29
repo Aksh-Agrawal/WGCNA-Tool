@@ -127,7 +127,7 @@ visualizationServer <- function(id, wgcna_results) {
       req(wgcna_results())
       
       results <- wgcna_results()
-      if (!is.null(results$MEs) && !is.null(results$traits)) {
+      if (!is.null(results$MEs) && !is.null(results$traits) && ncol(results$traits) > 0) {
         tryCatch({
           # Calculate correlations
           moduleTraitCor <- cor(results$MEs, results$traits, 
@@ -160,6 +160,14 @@ visualizationServer <- function(id, wgcna_results) {
           text(0.5, 0.5, paste("Error creating heatmap:", e$message), 
                cex = 1.2, col = "red")
         })
+      } else {
+        # Show informative message when traits are not available
+        plot.new()
+        text(0.5, 0.6, "Module-Trait Heatmap", cex = 1.5, font = 2, col = "#2d3748")
+        text(0.5, 0.4, "Please upload sample trait data to view\nmodule-trait correlations", 
+             cex = 1.1, col = "#4a5568")
+        text(0.5, 0.2, "Use the 'Data Upload' tab to upload a\nsample annotation file with traits", 
+             cex = 0.9, col = "#718096")
       }
     }, height = function() input$heatmap_height)
     
@@ -167,11 +175,36 @@ visualizationServer <- function(id, wgcna_results) {
     output$scale_free_plot <- renderPlot({
       req(wgcna_results())
       
-      # This would require storing the power analysis results
-      # For now, show a placeholder
-      plot.new()
-      text(0.5, 0.5, "Scale-free topology plot\n(requires power analysis results)", 
-           cex = 1.2, col = "gray")
+      results <- wgcna_results()
+      if (!is.null(results$power_analysis)) {
+        # Show the stored power analysis results
+        tryCatch({
+          sft <- results$power_analysis
+          powers <- sft$fitIndices$Power
+          
+          # Plot R^2 vs Power
+          plot(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+               xlab = "Soft Threshold (power)",
+               ylab = "Scale Free Topology Model Fit, signed R^2",
+               type = "n", main = "Scale Independence")
+          text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+               labels = powers, cex = 0.9, col = "red")
+          abline(h = 0.90, col = "red", lty = 2)
+          
+        }, error = function(e) {
+          plot.new()
+          text(0.5, 0.5, paste("Error creating plot:", e$message), 
+               cex = 1.2, col = "red")
+        })
+      } else {
+        # Show informative message
+        plot.new()
+        text(0.5, 0.6, "Scale-Free Topology", cex = 1.5, font = 2, col = "#2d3748")
+        text(0.5, 0.4, "Run power estimation to view\nscale-free topology analysis", 
+             cex = 1.1, col = "#4a5568")
+        text(0.5, 0.2, "Use 'Auto-Estimate' button in WGCNA Analysis tab", 
+             cex = 0.9, col = "#718096")
+      }
     })
     
     # Module size distribution
@@ -179,28 +212,37 @@ visualizationServer <- function(id, wgcna_results) {
       req(wgcna_results())
       
       results <- wgcna_results()
-      if (!is.null(results$net)) {
+      if (!is.null(results$net) && !is.null(results$net$colors)) {
         tryCatch({
           module_colors <- WGCNA::labels2colors(results$net$colors)
           module_sizes <- table(module_colors)
           
-          # Create bar plot
-          par(mar = c(8, 4, 4, 2))
-          bp <- barplot(sort(module_sizes, decreasing = TRUE),
-                       las = 2, 
-                       col = names(sort(module_sizes, decreasing = TRUE)),
+          # Create barplot
+          par(mar = c(10, 4, 4, 2))
+          bp <- barplot(module_sizes, 
+                       col = names(module_sizes),
                        main = "Module Size Distribution",
-                       ylab = "Number of Genes")
+                       ylab = "Number of Genes",
+                       las = 2,
+                       cex.names = 0.8)
           
-          # Add value labels
-          text(bp, sort(module_sizes, decreasing = TRUE) + max(module_sizes) * 0.02,
-               labels = sort(module_sizes, decreasing = TRUE), 
-               cex = 0.8, pos = 3)
+          # Add values on top of bars
+          text(bp, module_sizes + max(module_sizes) * 0.02, 
+               labels = module_sizes, cex = 0.8, pos = 3)
+          
         }, error = function(e) {
           plot.new()
           text(0.5, 0.5, paste("Error creating plot:", e$message), 
                cex = 1.2, col = "red")
         })
+      } else {
+        # Show informative message
+        plot.new()
+        text(0.5, 0.6, "Module Size Distribution", cex = 1.5, font = 2, col = "#2d3748")
+        text(0.5, 0.4, "Complete WGCNA analysis to view\nmodule size distribution", 
+             cex = 1.1, col = "#4a5568")
+        text(0.5, 0.2, "Run analysis in WGCNA Analysis tab", 
+             cex = 0.9, col = "#718096")
       }
     })
     
