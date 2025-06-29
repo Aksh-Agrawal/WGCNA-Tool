@@ -1,3 +1,64 @@
+# UI
+dataUploadUI <- function(id) {
+  ns <- NS(id)
+  tagList(
+    wellPanel(
+      h4("📁 Data Upload", style = "color: #3c8dbc;"),
+      
+      fluidRow(
+        column(6,
+               h5("Expression Data", style = "color: #2c3e50;"),
+               fileInput(ns("expression_data"), 
+                         "Choose Expression Matrix CSV File",
+                         accept = c(".csv", ".txt")),
+               helpText("Rows: Genes, Columns: Samples"),
+               
+               conditionalPanel(
+                 condition = paste0("output['", ns("expr_uploaded"), "']"),
+                 div(class = "alert alert-success",
+                     style = "margin-top: 10px;",
+                     icon("check-circle"), " Expression data loaded successfully!")
+               )
+        ),
+        
+        column(6,
+               h5("Sample Annotation", style = "color: #2c3e50;"),
+               fileInput(ns("sample_data"), 
+                         "Choose Sample Annotation CSV File",
+                         accept = c(".csv", ".txt")),
+               helpText("Rows: Samples, Columns: Traits"),
+               
+               conditionalPanel(
+                 condition = paste0("output['", ns("sample_uploaded"), "']"),
+                 div(class = "alert alert-success",
+                     style = "margin-top: 10px;",
+                     icon("check-circle"), " Sample data loaded successfully!")
+               )
+        )
+      ),
+      
+      br(),
+      
+      conditionalPanel(
+        condition = paste0("output['", ns("show_preview"), "']"),
+        wellPanel(
+          h5("📊 Data Summary", style = "color: #2c3e50;"),
+          verbatimTextOutput(ns("data_summary")),
+          
+          br(),
+          
+          tabsetPanel(
+            tabPanel("Expression Preview", 
+                     DT::DTOutput(ns("expr_preview"))),
+            tabPanel("Sample Preview", 
+                     DT::DTOutput(ns("sample_preview")))
+          )
+        )
+      )
+    )
+  )
+}
+
 dataUploadServer <- function(id) {
   moduleServer(id, function(input, output, session) {
     

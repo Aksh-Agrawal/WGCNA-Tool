@@ -182,7 +182,7 @@ enrichmentAnalysisServer <- function(id, wgcna_results) {
         ))
         
         showNotification(paste("Found", nrow(ego), "enriched GO terms"), 
-                         type = "success", duration = 5)
+                         type = "message", duration = 5)
         
       }, error = function(e) {
         showNotification(paste("Error in enrichment analysis:", e$message), 
